@@ -1,0 +1,638 @@
+
+.ante-modal {
+  position: relative;
+  top: 100px;
+  width: auto;
+  margin: 0 auto;
+  padding-bottom: 24px;
+  pointer-events: none;
+  &-mask {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1000;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.45);
+    filter: 'alpha(opacity=50)';
+    &-hidden {
+      display: none;
+    }
+  }
+  &-wrap {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1000;
+    overflow: auto;
+    outline: 0;
+    -webkit-overflow-scrolling: touch;
+  }
+  &-title {
+    margin: 0;
+    color: #ffffff;
+    font-weight: 500;
+    font-size: 18px;
+    line-height: 22px;
+    word-wrap: break-word;
+  }
+  &-content {
+    position: relative;
+    background-color: #1f1f1f;
+    background-clip: padding-box;
+    border: 0;
+    border-radius: 0px;
+    box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
+    pointer-events: auto;
+  }
+  &-close {
+    position: absolute;
+    top: 14px;
+    right: 24px;
+    width: 24px;
+    height: 24px;
+    z-index: 10;
+    cursor: pointer;
+    background-image: url("~@/assets/img/close-disable.png");
+    background-size: cover;
+    &:focus,
+    &:hover {
+      background-image: url("~@/assets/img/close-hover.png");
+    }
+  }
+  &-header {
+    padding: 16px 24px;
+    color: rgba(255, 255, 255, 0.65);
+    background: #1f1f1f;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 0px;
+  }
+  &-body {
+    padding: 0px;
+    font-size: 14px;
+    line-height: 1.5715;
+    word-wrap: break-word;
+    input[type="checkbox"] {
+      position: relative;
+      top: 0.23em;
+      width: 16px;
+      height: 16px;
+      border-radius: 0px !important;
+    }
+  }
+}
+
+#toolContainer {
+  position: relative;
+}
+
+#imgPanel {
+  padding: 1rem 0;
+  height: 60vh;
+  position: relative;
+  .imgList {
+    width: 18rem;
+    height: 100%;
+    float: left;
+    box-sizing: border-box;
+    border-right: 1px solid rgb(90, 90, 90);
+    overflow-y: auto;
+    .img-list-item {
+      width: calc(100% - 2rem);
+      height: 10rem;
+      margin: .5rem 1rem;
+      position: relative;
+      box-sizing: border-box;
+      border: 1px solid rgb(90, 90, 90);
+      .img-list-item-select {
+        position: absolute;
+        top: 3px;
+        right: 8px;
+      }
+      &.active {
+        border: 2px solid #1454B9;
+      }
+      img {
+        width: 100%;
+        height: 100%;
+      }
+    }
+  }
+  .imgEdit {
+    width: calc(100% - 20rem);
+    height: 100%;
+    float: left;
+    overflow: hidden;
+    position: relative;
+    margin-left: 1rem;
+    box-sizing: border-box;
+    background: rgb(201, 201, 201);
+    border: 1px solid rgb(90, 90, 90);
+    #imgContainer {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      position: relative;
+      img {
+        position: absolute;
+        cursor: move;
+        width: auto;
+        height: 100%;
+      }
+    }
+    .img-footer {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      z-index: 9999;
+      svg {
+        margin-right: 1rem;
+      }
+    }
+    
+    .item-panel {
+      width: 24px;
+      height: 24px;
+      margin: 6px;
+      float: left;
+    }
+    .zoom-in {
+      background-image: url("~@/assets/img/zoom-in.png");
+      background-size: cover;
+      &:hover {
+        background-image: url("~@/assets/img/zoom-in-hover.png");
+      }
+      &:active {
+        background-image: url("~@/assets/img/zoom-in-click.png");
+      }
+      &.active {
+        background-image: url("~@/assets/img/zoom-in-click.png");
+      }
+    }
+    .zoom-out {
+      background-image: url("~@/assets/img/zoom-out.png");
+      background-size: cover;
+      &:hover {
+        background-image: url("~@/assets/img/zoom-out-hover.png");
+      }
+      &:active {
+        background-image: url("~@/assets/img/zoom-out-click.png");
+      }
+      &.active {
+        background-image: url("~@/assets/img/zoom-out-click.png");
+      }
+    }
+    .rotate {
+      background-image: url("~@/assets/img/rotate.png");
+      background-size: cover;
+      &:hover {
+        background-image: url("~@/assets/img/rotate-hover.png");
+      }
+      &:active {
+        background-image: url("~@/assets/img/rotate-click.png");
+      }
+      &.active {
+        background-image: url("~@/assets/img/rotate-click.png");
+      }
+    }
+  }
+}
+
+#imageEditContainer {
+  z-index: 10000;
+  position: absolute;
+  top: 0;
+  left: 0;
+  cursor: crosshair;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+#toolPanelTop {
+  position: relative;
+  height: auto;
+  background: #ffffff;
+  padding: 10px;
+  overflow: hidden;
+  border-bottom: 1px solid rgb(90, 90, 90);
+  // z-index: 10000;
+  // top: 0;
+  // left: 0;
+  .item-panel {
+    width: 24px;
+    height: 24px;
+    margin-right: 15px;
+    float: left;
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+  .delete {
+    background-image: url("~@/assets/img/delete.png");
+    background-size: cover;
+    &:hover {
+      background-image: url("~@/assets/img/delete-hover.png");
+    }
+    &:active {
+      background-image: url("~@/assets/img/delete-click.png");
+    }
+    &.active {
+      background-image: url("~@/assets/img/delete-click.png");
+    }
+  }
+  .shot {
+    background-image: url("~@/assets/img/shot.png");
+    background-size: cover;
+    &:hover {
+      background-image: url("~@/assets/img/shot-hover.png");
+    }
+    &:active {
+      background-image: url("~@/assets/img/shot-click.png");
+    }
+    &.active {
+      background-image: url("~@/assets/img/shot-click.png");
+    }
+  }
+
+  .square {
+    background-image: url("~@/assets/img/square.png");
+    background-size: cover;
+    &:hover {
+      background-image: url("~@/assets/img/square-hover.png");
+    }
+    &:active {
+      background-image: url("~@/assets/img/square-click.png");
+    }
+    &.active {
+      background-image: url("~@/assets/img/square-click.png");
+    }
+  }
+
+  .round {
+    background-image: url("~@/assets/img/round.png");
+    background-size: cover;
+    &:hover {
+      background-image: url("~@/assets/img/round-hover.png");
+    }
+    &:active {
+      background-image: url("~@/assets/img/round-click.png");
+    }
+    &.active {
+      background-image: url("~@/assets/img/round-click.png");
+    }
+  }
+  .line {
+    background-image: url("~@/assets/img/line.png");
+    background-size: cover;
+    &:hover {
+      background-image: url("~@/assets/img/line-hover.png");
+    }
+    &:active {
+      background-image: url("~@/assets/img/line-click.png");
+    }
+    &.active {
+      background-image: url("~@/assets/img/line-click.png");
+    }
+  }
+  .right-top {
+    background-image: url("~@/assets/img/right-top.png");
+    background-size: cover;
+    &:hover {
+      background-image: url("~@/assets/img/right-top-hover.png");
+    }
+    &:active {
+      background-image: url("~@/assets/img/right-top-click.png");
+    }
+    &.active {
+      background-image: url("~@/assets/img/right-top-click.png");
+    }
+  }
+
+  .brush {
+    background-image: url("~@/assets/img/brush.png");
+    background-size: cover;
+    &:hover {
+      background-image: url("~@/assets/img/brush-hover.png");
+    }
+    &:active {
+      background-image: url("~@/assets/img/brush-click.png");
+    }
+    &.active{
+      background-image: url("~@/assets/img/brush-click.png");
+    }
+  }
+
+  .mosaicPen {
+    background-image: url("~@/assets/img/mosaicPen.png");
+    background-size: cover;
+    &:hover {
+      background-image: url("~@/assets/img/mosaicPen-hover.png");
+    }
+    &:active {
+      background-image: url("~@/assets/img/mosaicPen-click.png");
+    }
+    &.active {
+      background-image: url("~@/assets/img/mosaicPen-click.png");
+    }
+  }
+  
+  .separateLine {
+    width: 1px;
+    background-image: url("~@/assets/img/seperateLine.png");
+    background-size: cover;
+  }
+
+  .text {
+    background-image: url("~@/assets/img/text.png");
+    background-size: cover;
+    &:hover {
+      background-image: url("~@/assets/img/text-hover.png");
+    }
+    &:active {
+      background-image: url("~@/assets/img/text-click.png");
+    }
+    &.active {
+      background-image: url("~@/assets/img/text-click.png");
+    }
+  }
+  .clear {
+    background-image: url("~@/assets/img/clear.png");
+    background-size: cover;
+    &:hover {
+      background-image: url("~@/assets/img/clear-hover.png");
+    }
+  }
+  .save {
+    background-image: url("~@/assets/img/save.png");
+    background-size: cover;
+    &:hover {
+      background-image: url("~@/assets/img/save-hover.png");
+    }
+    &:active {
+      background-image: url("~@/assets/img/save-click.png");
+    }
+  }
+  .close {
+    background-image: url("~@/assets/img/close.png");
+    background-size: cover;
+    &:hover {
+      background-image: url("~@/assets/img/close-hover.png");
+    }
+  }
+  .undo-disabled {
+    background-size: cover;
+    background-image: url("~@/assets/img/undo-disabled.png");
+  }
+  .undo {
+    background-size: cover;
+    background-image: url("~@/assets/img/undo.png");
+    &:hover{
+      background-image: url("~@/assets/img/undo-hover.png");
+    }
+  }
+  .confirm {
+    background-image: url("~@/assets/img/confirm.png");
+    background-size: cover;
+    &:hover {
+      background-image: url("~@/assets/img/confirm-hover.png");
+    }
+  }
+}
+#toolPanel {
+  height: auto;
+  background: #ffffff;
+  z-index: 10000;
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 10px;
+  .item-panel {
+    width: 24px;
+    height: 24px;
+    margin-right: 15px;
+    float: left;
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+  .save {
+    background-image: url("~@/assets/img/save.png");
+    background-size: cover;
+    &:hover {
+      background-image: url("~@/assets/img/save-hover.png");
+    }
+    &:active {
+      background-image: url("~@/assets/img/save-click.png");
+    }
+  }
+  .close {
+    background-image: url("~@/assets/img/close.png");
+    background-size: cover;
+    &:hover {
+      background-image: url("~@/assets/img/close-hover.png");
+    }
+  }
+  .confirm {
+    background-image: url("~@/assets/img/confirm.png");
+    background-size: cover;
+    &:hover {
+      background-image: url("~@/assets/img/confirm-hover.png");
+    }
+  }
+}
+
+#optionPanel {
+  height: auto;
+  top: 6px;
+  left: 0;
+  border-radius: 5px;
+  background: #ffffff;
+  z-index: 10001;
+  position: absolute;
+  padding: 6px;
+  &:nth-child(2) {
+    border-left: 1px solid #aaaaaa;
+  }
+  .brush-select-panel{
+    height: 40px;
+    float: left;
+    padding-right: .5rem;
+    .item-panel {
+      width: 20px;
+      height: 20px;
+      margin-right: 18px;
+      margin-top: 10px;
+      float: left;
+      &:first-child {
+        margin-left: 2px;
+      }
+      &:last-child {
+        margin-right: 0;
+      }
+    }
+    .brush-small {
+      background-size: cover;
+      background-image: url("~@/assets/img/round-normal-small.png");
+      &:hover {
+        background-image: url("~@/assets/img/round-selected-small.png");
+      }
+      &:active {
+        background-image: url("~@/assets/img/round-selected-small.png");
+      }
+      &.active {
+        background-image: url("~@/assets/img/round-selected-small.png");
+      }
+    }
+    
+    .brush-medium {
+      background-size: cover;
+      background-image: url("~@/assets/img/round-normal-medium.png");
+
+      &:hover {
+        background-image: url("~@/assets/img/round-selected-medium.png");
+      }
+      &:active {
+        background-image: url("~@/assets/img/round-selected-medium.png");
+      }
+      &.active{
+        background-image: url("~@/assets/img/round-selected-medium.png");
+      }
+    }
+    .brush-big {
+      background-size: cover;
+      background-image: url("~@/assets/img/round-normal-big.png");
+
+      &:hover {
+        background-image: url("~@/assets/img/round-selected-big.png");
+      }
+      &:active {
+        background-image: url("~@/assets/img/round-selected-big.png");
+      }
+      &.active {
+        background-image: url("~@/assets/img/round-selected-big.png");
+      }
+    }
+  }
+  .right-panel {
+    float: left;
+    padding-left: .5rem;
+    // 已选择容器
+    .color-select-panel {
+      width: 40px;
+      height: 40px;
+      background: #F53340;
+      border: 3px solid #cccccc;
+      float: left;
+      box-sizing: border-box;
+      margin-right: 2px;
+    }
+    // 颜色容器
+    .color-panel{
+      width: 148px;
+      float: left;
+      position: relative;
+      top: -1px;
+      .color-item {
+        width: 19px;
+        height: 19px;
+        margin: 1px;
+        float: left;
+        &:nth-child(1) {
+          border: 1px solid #aaaaaa;
+          background: #FEFFFF;
+        }
+        &:nth-child(2) {
+          background: #000000;
+        }
+        &:nth-child(3) {
+          background: #D254CF;
+        }
+        &:nth-child(4) {
+          background: #12A9D7;
+        }
+        &:nth-child(5) {
+          background: #30A345;
+        }
+        &:nth-child(6) {
+          background: #FACF50;
+        }
+        &:nth-child(7) {
+          background: #F66632;
+        }
+        &:nth-child(8) {
+          background: #989998;
+        }
+        &:nth-child(9) {
+          background: #F53440;
+        }
+        &:nth-child(10) {
+          background: #F65E95;
+        }
+        &:nth-child(11) {
+          background: #16DCDC;
+        }
+        &:nth-child(12) {
+          background: #0061D5;
+        }
+        &:nth-child(13) {
+          background: #99CC00;
+        }
+        &:nth-child(14) {
+          background: #808080;
+        }
+      }
+    }
+  }
+  .right-font {
+    float: left;
+    color: #000000;
+    text-align: center;
+    .font-bold {
+      width: 24px;
+      font: normal bold 20px '微软雅黑';
+      line-height: 40px;
+      display: inline-block;
+      padding-left: .5rem;
+      cursor: pointer;
+      &.active{
+        color: #1454B9;
+      }
+    }
+    .font-style {
+      width: 24px;
+      font: italic bold 20px '微软雅黑';
+      line-height: 40px;
+      display: inline-block;
+      padding-left: .5rem;
+      cursor: pointer;
+      &.active{
+        color: #1454B9;
+      }
+    }
+    .font-size {
+      margin: 0 .5rem;
+      border: none;
+      border-bottom: 1px solid rgb(90, 90, 90);
+      line-height: 40px; 
+    }
+  }
+}
+
+#textInputPanel {
+  min-width: 20px;
+  min-height: 30px;
+  line-height: 30px;
+  padding: 5px;
+  box-sizing: border-box;
+  position: absolute;
+  outline: none;
+  top: 0;
+  left: 0;
+  color: red;
+  border: 2px solid #aaaaaa;
+  z-index: 10001;
+}
