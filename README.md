@@ -30,7 +30,7 @@ app.use(screenWindow, { themeColor: '#1f1f1f', headColor: '#1f1f1f' })
     :imageList="imageList"
     @edit-img-list="editImgList"
     @destroy-component="destroyComponent"
-    @get-image-data="getImg">
+    @get-image-data="getImageData">
   </screen-window>
 </template>
 
@@ -49,8 +49,8 @@ export default defineComponent({
       imageEditStatus.value = status;
     }
     // 获取裁剪区域图片信息
-    const getImg = function(base64: string) {
-      console.log("截图组件传递的图片信息", base64);
+    const getImageData = function(base64: string) {
+      console.log("图片编辑弹框传递的图片信息", base64);
     }
     
     return {
@@ -65,11 +65,11 @@ export default defineComponent({
 </script>
 ```
 ### 参数说明
-如示例代码所示，在template中直接使用`screen-short`插件，绑定组件需要的事件处理函数即可。
+如示例代码所示，在template中直接使用`screen-window`插件，绑定组件需要的事件处理函数即可。
 
 接下来就跟大家讲下组件中每个属性的意义：
 * imageEditStatus 用于控制组件是否出现在dom中
-* imageList 用于存储编辑的图片 例如：imageList.value = [require('@/assets/image/person.png')]
+* imageList 用于存储编辑的图片信息 例如：`imageList.value = [require('@/assets/image/person.png')]`
 * @destroy-component 用于接收图片编辑后传递的销毁消息，需要在对应的函数中销毁编辑弹框
 * @edit-img-list 用于接收图片编辑器中删除的imageList数据，保持数据一致
 * @get-image-data 用于接收图片编辑后传递的base64图片信息，在确认截图操作和保存绘制图片事件后触发
