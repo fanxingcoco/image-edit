@@ -72,8 +72,5 @@ export default defineComponent({
 * @get-image-data 用于接收截图组件传递的框选区域的base64图片信息，我们需要为他提供一个函数来接收截图组件传递的消息
 
 #### 可选参数
-* `enableWebRtc` 是否启用webrtc，值为boolean类型，值为false则使用html2canvas来截图
-* `level` 截图容器层级，值为number类型。
-* `clickCutFullScreen` 单击截全屏启用状态,值为`boolean`类型， 默认为`false`
-## 写在最后
-至此，插件的所有使用方法就介绍完了。
+* `themeColor` 设置弹框body底色
+* `headColor` 设置弹框head底色
