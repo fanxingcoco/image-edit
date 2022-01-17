@@ -883,9 +883,9 @@ export default class EventMonitoring {
         }
         this.data.setCaptureState(true); // 重新抓拍底图
         this.resetComponent(); // 重置组件
-        if (this.emit) {
-          this.emit("get-image-data", base64);
-        }
+      }
+      if (this.emit) {
+        this.emit("get-img-data", base64);
       }
     }
     return base64;

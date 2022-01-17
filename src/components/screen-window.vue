@@ -429,7 +429,7 @@ export default {
     "destroy-component": (status: boolean) => {
       return !_.isNull(status);
     },
-    "get-image-data": (base64: string) => {
+    "get-img-data": (base64: string) => {
       return !_.isNull(base64);
     },
     "edit-img-list": (editImgList: any) => {
