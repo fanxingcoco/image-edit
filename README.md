@@ -1,6 +1,5 @@
 # vue-web-image-edit
 web端图片编辑(Vue3版),本插件仅支持Vue3
-效果图如下：![Image text](https://github.com/fanxingcoco/image-edit/blob/main/src/assets/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202022-03-25%20095732.png)
 
 ## 插件安装
 ```bash
