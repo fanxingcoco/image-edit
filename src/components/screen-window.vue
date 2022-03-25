@@ -25,7 +25,11 @@
                     全选
                   </div>
                   <div class="item-panel separateLine"></div>
-                  <div class="item-panel delete" title="删除" @click="deleteImgFun"></div>
+                  <div
+                    class="item-panel delete"
+                    title="删除"
+                    @click="deleteImgFun"
+                  ></div>
                   <div
                     class="item-panel shot"
                     title="截图"
@@ -161,8 +165,10 @@
                   </div>
                 </div>
                 <div class="imgEdit">
-                  <div id="imgContainer"
-                    @mouseleave="imgOptEvent('mouseLeave')">
+                  <div
+                    id="imgContainer"
+                    @mouseleave="imgOptEvent('mouseLeave')"
+                  >
                     <canvas
                       id="imageEditContainer"
                       v-show="canvasStatus"
@@ -379,7 +385,7 @@ export default {
       const imgArr: any = [];
       if (imgData.isSelectAll || imgData.imgList.length == 0) {
         imgData.imgList = [];
-        imgData.currentImgUrl = '';
+        imgData.currentImgUrl = "";
         // 初始化编辑数据
         data.setInitStatus(true);
         data = new InitData();
@@ -395,8 +401,8 @@ export default {
         // 重新选中图片
         if (imgData.imgList.length > 0) {
           const imgListLength = imgData.imgList.length;
-          imgData.imgList[imgListLength-1].currentImg = true;
-          imgData.currentImgUrl = imgData.imgList[imgListLength-1].url;
+          imgData.imgList[imgListLength - 1].currentImg = true;
+          imgData.currentImgUrl = imgData.imgList[imgListLength - 1].url;
           // 初始化编辑数据
           data.setInitStatus(true);
           data = new InitData();

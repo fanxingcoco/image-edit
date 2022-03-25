@@ -589,8 +589,8 @@ export default class EventMonitoring {
    * @param mouseEvent
    */
   public toolClickEvent = (toolName: string, index: number) => {
-    let undoStatus = this.data.getUndoStatus();
-    if(this.toolName == "undo" && !undoStatus) return; // 如果是撤销操作 且状态为false 
+    const undoStatus = this.data.getUndoStatus();
+    if (this.toolName == "undo" && !undoStatus) return; // 如果是撤销操作且状态为false
     // 显示canvas图层
     this.data.setCanvasStatus(true);
 
@@ -637,7 +637,6 @@ export default class EventMonitoring {
       // 设置画笔选择工具栏三角形角标位置
       this.data.setOptionIcoPosition(calculateOptionIcoPosition(index));
     }
-    
     // 初始化监听
     if (
       toolName != "save" &&
@@ -684,7 +683,8 @@ export default class EventMonitoring {
     ) {
       this.initCapture(); // 获取截屏底图
     }
-    if (toolName == "shot") { // 打开截图功能
+    if (toolName == "shot") {
+      // 打开截图功能
       if (captureState.value) {
         this.initCapture().then(() => {
           this.captureClickEvent(); // 开始截屏
@@ -692,33 +692,38 @@ export default class EventMonitoring {
       } else {
         this.captureClickEvent(); // 开始截屏
       }
-    } else if (toolName == "save") { // 保存图片
+    } else if (toolName == "save") {
+      // 保存图片
       if (captureState.value) {
         this.initCapture().then(() => {
-          this.getCanvasImgData('save');
+          this.getCanvasImgData("save");
         });
       } else {
-        this.getCanvasImgData('save');
+        this.getCanvasImgData("save");
       }
-    } else if (toolName == "download") { // 下载图片
+    } else if (toolName == "download") {
+      // 下载图片
       if (captureState.value) {
         this.initCapture().then(() => {
-          this.getCanvasImgData('download');
+          this.getCanvasImgData("download");
         });
       } else {
-        this.getCanvasImgData('download');
+        this.getCanvasImgData("download");
       }
-    } else if (toolName == "undo") { // 撤销
+    } else if (toolName == "undo") {
+      // 撤销
       this.takeOutHistory();
-    } else if (toolName == "close" || toolName == "clear") { // 重置组件
+    } else if (toolName == "close" || toolName == "clear") {
+      // 重置组件
       this.resetComponent();
-    } else if (toolName == "confirm" && this.screenShortCanvas && this.emit) { // 确认截图
+    } else if (toolName == "confirm" && this.screenShortCanvas && this.emit) {
+      // 确认截图
       if (captureState.value) {
         this.initCapture().then(() => {
-          this.getCanvasImgData('shot');
+          this.getCanvasImgData("shot");
         });
       } else {
-        this.getCanvasImgData('shot');
+        this.getCanvasImgData("shot");
       }
     }
     // 设置工具栏点击状态
@@ -813,8 +818,6 @@ export default class EventMonitoring {
       this.history = []; // 清除历史数据
       this.data.setToolStatus(false); // 隐藏工具栏
       this.data.setCanvasStatus(false); // 隐藏canvas图层
-      // 重置组件
-      // this.emit("destroy-component", false);
       return;
     }
     throw "组件重置失败";
@@ -830,7 +833,7 @@ export default class EventMonitoring {
     let base64 = "";
     // 保存图片,需要减去八个点的大小
     if (this.screenShortCanvas && this.screenShortController.value) {
-      if (isSave == 'shot') {
+      if (isSave == "shot") {
         // 保存截图时
         // 清除绘制的蒙层(为了去掉八个点 且不改变框选区域大小)
         const contextCanvas = this.screenShortController.value?.getContext(
@@ -851,11 +854,11 @@ export default class EventMonitoring {
         this.screenShortController.value?.height
       );
       this.screenShortCanvas.restore(); // 绘制结束
-      if (isSave == 'save' || isSave == 'download') {
+      if (isSave == "save" || isSave == "download") {
         // 下载图片
-        let isDownLoad = false
-        if(isSave == 'download') {
-          isDownLoad = true
+        let isDownLoad = false;
+        if (isSave == "download") {
+          isDownLoad = true;
         }
         // 将canvas转为图片
         base64 = saveCanvasToImage(
@@ -895,8 +898,8 @@ export default class EventMonitoring {
         this.data.setCaptureState(true); // 重新抓拍底图
       }
       this.resetComponent(); // 重置组件
-      if (this.emit && (isSave == 'save' || isSave == 'shot')) {
-        this.emit("get-img-data", {type: isSave, base64: base64});
+      if (this.emit && (isSave == "save" || isSave == "shot")) {
+        this.emit("get-img-data", { type: isSave, base64: base64 });
       }
     }
     return base64;
@@ -905,10 +908,7 @@ export default class EventMonitoring {
   /**
    * img的放大缩小旋转移动操作
    */
-  public imgOptEvent = (
-    value: string,
-    e: any
-  ) => {
+  public imgOptEvent = (value: string, e: any) => {
     const canvasStatus = this.data.getCanvasStatus();
     if (canvasStatus.value) return;
     const imgPosition = this.data.getImgPosition();
@@ -928,7 +928,7 @@ export default class EventMonitoring {
         imgPosition.value.deg = 0;
       }
     } else if (value == "mouseDown") {
-      e.preventDefault()
+      e.preventDefault();
       imgPosition.value.isMove = true;
       imgPosition.value.startX = e.clientX;
       imgPosition.value.startY = e.clientY;
