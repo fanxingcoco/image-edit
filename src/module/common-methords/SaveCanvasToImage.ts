@@ -6,7 +6,8 @@ export function saveCanvasToImage(
   startX: number,
   startY: number,
   width: number,
-  height: number
+  height: number,
+  isDownLoad: boolean
 ) {
   // 获取裁剪框区域图片信息
   const img = context.getImageData(startX, startY, width, height);
@@ -19,13 +20,17 @@ export function saveCanvasToImage(
   if (imgContext) {
     // 将图片放进裁剪框内
     imgContext.putImageData(img, 0, 0);
-    const a = document.createElement("a");
-    // 获取图片
-    a.href = canvas.toDataURL("png");
-    // 下载图片
-    a.download = `${new Date().getTime()}.png`;
-    a.click();
-    return a.href;
+    if (isDownLoad) {
+      const a = document.createElement("a");
+      // 获取图片
+      a.href = canvas.toDataURL("png");
+      // 下载图片
+      a.download = `${new Date().getTime()}.png`;
+      a.click();
+      return a.href;
+    } else {
+      return canvas.toDataURL("png");
+    }
   }
   return "";
 }

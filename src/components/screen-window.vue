@@ -25,9 +25,10 @@
                     全选
                   </div>
                   <div class="item-panel separateLine"></div>
-                  <div class="item-panel delete" @click="deleteImgFun"></div>
+                  <div class="item-panel delete" title="删除" @click="deleteImgFun"></div>
                   <div
                     class="item-panel shot"
+                    title="截图"
                     @click="toolClickEvent('shot', 0, $event)"
                   ></div>
                   <div class="item-panel separateLine"></div>
@@ -37,21 +38,26 @@
                     :class="
                       `item-panel ${item.title} ${
                         item.title == currentName ? 'active' : ''
+                      } ${
+                        item.title !== 'undo' || undoStatus ? '' : 'disabled'
                       }`
                     "
+                    :title="item.name"
                     @click="toolClickEvent(item.title, item.id, $event)"
                   ></div>
                   <!--撤销部分单独处理-->
-                  <div
+                  <!-- <div
                     v-if="undoStatus"
                     class="item-panel undo"
+                    title="撤销"
                     @click="toolClickEvent('undo', 10, $event)"
                   ></div>
-                  <div v-else class="item-panel undo-disabled"></div>
-                  <div
+                  <div v-else class="item-panel undo-disabled"></div> -->
+                  <!-- <div
                     class="item-panel clear"
-                    @click="toolClickEvent('close', 11, $event)"
-                  ></div>
+                    title="清除"
+                    @click="toolClickEvent('clear', 11, $event)"
+                  ></div> -->
                 </div>
                 <!--画笔绘制选项-->
                 <div
@@ -143,10 +149,10 @@
                     <input
                       type="checkbox"
                       name="checkImg"
+                      :checked="item.isChecked"
                       @click="value => checkImgFun(value, index)"
                       class="img-list-item-select"
                     />
-                    <!-- <a-checkbox :checked="item.isChecked" @change="value => checkImgFun(value, index)" size='small' class="img-list-item-select"></a-checkbox> -->
                     <img
                       :src="item.url"
                       alt=""
@@ -155,14 +161,8 @@
                   </div>
                 </div>
                 <div class="imgEdit">
-                  <div
-                    id="imgContainer"
-                    @mousemove="
-                      e => {
-                        imgOptEvent('mouseMove', e);
-                      }
-                    "
-                  >
+                  <div id="imgContainer"
+                    @mouseleave="imgOptEvent('mouseLeave')">
                     <canvas
                       id="imageEditContainer"
                       v-show="canvasStatus"
@@ -180,10 +180,12 @@
                       <!--关闭与确认进行单独处理-->
                       <div
                         class="item-panel close"
+                        title="关闭"
                         @click="toolClickEvent('close', 12, $event)"
                       ></div>
                       <div
                         class="item-panel confirm"
+                        title="确认"
                         @click="toolClickEvent('confirm', 13, $event)"
                       ></div>
                     </div>
@@ -209,6 +211,11 @@
                         top: imgPosition.endY + 'px'
                       }"
                       alt=""
+                      @mousemove="
+                        e => {
+                          imgOptEvent('mouseMove', e);
+                        }
+                      "
                       @mousedown="
                         e => {
                           imgOptEvent('mouseDown', e);
@@ -218,17 +225,20 @@
                     />
                   </div>
                   <!-- 图片放大缩小旋转移动操作 -->
-                  <div class="img-footer">
+                  <div v-show="!canvasStatus" class="img-footer">
                     <div
                       class="item-panel zoom-in"
+                      title="放大"
                       @click="imgOptEvent('magnify')"
                     ></div>
                     <div
                       class="item-panel zoom-out"
+                      title="缩小"
                       @click="imgOptEvent('shrink')"
                     ></div>
                     <div
                       class="item-panel rotate"
+                      title="旋转"
                       @click="imgOptEvent('rotate')"
                     ></div>
                     <!-- <div class="item-panel separateLine" @click="imgOptEvent('move')></div> -->
@@ -367,8 +377,13 @@ export default {
     const deleteImgFun = () => {
       // 删除图片数据
       const imgArr: any = [];
-      if (imgData.isSelectAll) {
+      if (imgData.isSelectAll || imgData.imgList.length == 0) {
         imgData.imgList = [];
+        imgData.currentImgUrl = '';
+        // 初始化编辑数据
+        data.setInitStatus(true);
+        data = new InitData();
+        resetComponent();
       } else {
         for (let i = imgData.imgList.length - 1; i >= 0; i--) {
           if (imgData.imgList[i].isChecked) {
@@ -376,6 +391,16 @@ export default {
           } else {
             imgArr.push(imgData.imgList[i].url);
           }
+        }
+        // 重新选中图片
+        if (imgData.imgList.length > 0) {
+          const imgListLength = imgData.imgList.length;
+          imgData.imgList[imgListLength-1].currentImg = true;
+          imgData.currentImgUrl = imgData.imgList[imgListLength-1].url;
+          // 初始化编辑数据
+          data.setInitStatus(true);
+          data = new InitData();
+          resetComponent();
         }
       }
       context.emit("edit-img-list", imgArr);
@@ -429,8 +454,8 @@ export default {
     "destroy-component": (status: boolean) => {
       return !_.isNull(status);
     },
-    "get-img-data": (base64: string) => {
-      return !_.isNull(base64);
+    "get-img-data": (data: object) => {
+      return !_.isNull(data);
     },
     "edit-img-list": (editImgList: any) => {
       return !_.isNull(editImgList);

@@ -1,5 +1,6 @@
 # vue-web-image-edit
 web端图片编辑(Vue3版),本插件仅支持Vue3
+效果图如下：![Image text]()
 
 ## 插件安装
 ```bash
@@ -49,8 +50,13 @@ export default defineComponent({
       imageEditStatus.value = status;
     }
     // 获取裁剪图片、绘图图片信息
-    const getImgData = function(base64: string) {
-      console.log("图片编辑弹框传递的图片信息", base64);
+    const getImgData = function(data: { type: string|undefined; base64: string|undefined; }) {
+      // imageUrl.value = data.base64
+      // if(data.base64 && data.type == 'save') {
+      //   imageList.value.push(data.base64)
+      //   imageEditStatus.value = false;
+      // }
+      console.log("图片编辑弹框传递的图片信息", data.base64);
     }
     
     return {
@@ -71,7 +77,7 @@ export default defineComponent({
 * imageList 用于存储编辑的图片信息 例如：`imageList.value = [require('@/assets/image/person.png')]`
 * @destroy-component 用于接收图片编辑后传递的销毁消息，需要在对应的函数中销毁编辑弹框
 * @edit-img-list 用于接收图片编辑器中删除的imageList数据，保持数据一致
-* @get-image-data 用于接收图片编辑后传递的base64图片信息，在确认截图和保存绘制图片事件后触发
+* @get-image-data 用于接收图片编辑后传递的base64图片信息，在确认截图(type: "shot")和保存(type: "save“)绘制图片事件后触发
 
 #### 可选参数
 * `themeColor` 设置弹框body底色

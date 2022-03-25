@@ -72,10 +72,9 @@ export function drawText(
   // 设置字体颜色
   context.fillStyle = color;
   context.textBaseline = "middle";
-  // context.font = `${fontItalic ? 'italic' : ''} ${fontBold ? 'bold' : ''} ${fontSize}px 微软雅黑`;
   context.font =
-    `${fontItalic ? "italic" : " "}` +
-    `${fontBold ? "bold" : " "}` +
+    `${fontItalic ? "italic " : ""}` +
+    `${fontBold ? "bold " : ""}` +
     `${fontSize}px 微软雅黑`;
   context.fillText(text, mouseX, mouseY);
   // 结束绘制

@@ -1,31 +1,38 @@
 export default [
   {
     id: 1,
-    title: "square"
+    title: "square",
+    name: "方框"
   },
   {
     id: 2,
-    title: "round"
+    title: "round",
+    name: "圆框"
   },
   {
     id: 3,
-    title: "line"
+    title: "line",
+    name: "直线"
   },
   {
     id: 4,
-    title: "right-top"
+    title: "right-top",
+    name: "箭头"
   },
   {
     id: 5,
-    title: "brush"
+    title: "brush",
+    name: "画笔"
   },
   {
     id: 6,
-    title: "mosaicPen"
+    title: "mosaicPen",
+    name: "马赛克"
   },
   {
     id: 7,
-    title: "text"
+    title: "text",
+    name: "文字"
   },
   {
     id: 8,
@@ -33,6 +40,22 @@ export default [
   },
   {
     id: 9,
-    title: "save"
+    title: "undo",
+    name: "撤销"
+  },
+  {
+    id: 10,
+    title: "clear",
+    name: "清除"
+  },
+  {
+    id: 11,
+    title: "save",
+    name: "保存"
+  },
+  {
+    id: 12,
+    title: "download",
+    name: "下载"
   }
 ];

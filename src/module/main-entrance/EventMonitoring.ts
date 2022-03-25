@@ -1,4 +1,4 @@
-import { onMounted, onUnmounted, Ref, nextTick } from "vue";
+import { onMounted, onUnmounted, Ref } from "vue";
 import { SetupContext } from "@vue/runtime-core";
 import {
   cutOutBoxBorder,
@@ -169,22 +169,7 @@ export default class EventMonitoring {
     // 获取截图区域画canvas容器画布
     const contextCanvas = this.screenShortController.value?.getContext("2d");
     if (contextCanvas == null) return;
-    nextTick(() => {
-      drawMasking(contextCanvas); // 绘制蒙层
-    });
-    // 添加监听
-    this.screenShortController.value?.addEventListener(
-      "mousedown",
-      this.mouseDownEvent
-    );
-    this.screenShortController.value?.addEventListener(
-      "mousemove",
-      this.mouseMoveEvent
-    );
-    this.screenShortController.value?.addEventListener(
-      "mouseup",
-      this.mouseUpEvent
-    );
+    drawMasking(contextCanvas); // 绘制蒙层
   };
 
   // 鼠标按下事件
@@ -210,11 +195,8 @@ export default class EventMonitoring {
     if (
       this.toolName == "text" &&
       this.textInputController?.value &&
-      this.screenShortController?.value &&
       this.screenShortCanvas
     ) {
-      // 修改鼠标样式
-      this.screenShortController.value.style.cursor = "text";
       // 显示文本输入区域
       this.data.setTextStatus(true);
       // 判断输入框位置是否变化
@@ -301,16 +283,6 @@ export default class EventMonitoring {
     const tempHeight = currentY - startY;
     // 工具栏绘制
     if (this.data.getToolClickStatus().value && this.dragging) {
-      // // 获取裁剪框位置信息
-      // const cutBoxPosition = this.data.getCutOutBoxPosition();
-      // // 绘制中工具的起始x、y坐标不能小于裁剪框的起始坐标
-      // // 绘制中工具的起始x、y坐标不能大于裁剪框的结束标作
-      // // 当前鼠标的x坐标不能小于裁剪框起始x坐标，不能大于裁剪框的结束坐标
-      // // 当前鼠标的y坐标不能小于裁剪框起始y坐标，不能大于裁剪框的结束坐标
-      // if (
-      //   !getDrawBoundaryStatus(startX, startY, cutBoxPosition) ||
-      //   !getDrawBoundaryStatus(currentX, currentY, cutBoxPosition)
-      // ) return;
       // 当前操作的不是马赛克则显示最后一次画布绘制时的状态
       if (this.toolName != "mosaicPen") {
         this.showLastHistory();
@@ -387,31 +359,31 @@ export default class EventMonitoring {
         default:
           break;
       }
-      return;
+    } else {
+      // 执行裁剪框操作函数
+      this.operatingCutOutBox(
+        currentX,
+        currentY,
+        startX,
+        startY,
+        width,
+        height,
+        this.screenShortCanvas
+      );
+      // 如果鼠标未点击或者当前操作的是裁剪框都return
+      if (!this.dragging || this.draggingTrim) return;
+      // 绘制裁剪框
+      this.tempGraphPosition = drawCutOutBox(
+        startX,
+        startY,
+        tempWidth,
+        tempHeight,
+        this.screenShortCanvas,
+        this.borderSize,
+        this.screenShortController.value as HTMLCanvasElement,
+        this.screenShortImageController as HTMLCanvasElement
+      ) as drawCutOutBoxReturnType;
     }
-    // 执行裁剪框操作函数
-    this.operatingCutOutBox(
-      currentX,
-      currentY,
-      startX,
-      startY,
-      width,
-      height,
-      this.screenShortCanvas
-    );
-    // 如果鼠标未点击或者当前操作的是裁剪框都return
-    if (!this.dragging || this.draggingTrim) return;
-    // 绘制裁剪框
-    this.tempGraphPosition = drawCutOutBox(
-      startX,
-      startY,
-      tempWidth,
-      tempHeight,
-      this.screenShortCanvas,
-      this.borderSize,
-      this.screenShortController.value as HTMLCanvasElement,
-      this.screenShortImageController as HTMLCanvasElement
-    ) as drawCutOutBoxReturnType;
   };
 
   // 鼠标抬起事件
@@ -459,7 +431,7 @@ export default class EventMonitoring {
       this.dragFlag = false;
       // 显示工具栏
       this.data.setToolStatus(true);
-      nextTick().then(() => {
+      setTimeout(() => {
         if (this.toolController.value != null) {
           // 计算工具栏位置
           const toolLocation = calculateToolLocation(
@@ -517,30 +489,22 @@ export default class EventMonitoring {
         if (context.isPointInPath(currentX, currentY)) {
           switch (this.cutOutBoxBorderArr[i].index) {
             case 1:
-              if (this.data.getToolClickStatus().value) {
-                this.screenShortController.value.style.cursor = "crosshair";
-              } else {
-                this.screenShortController.value.style.cursor = "move";
-              }
+              this.screenShortController.value.style.cursor = "move";
               break;
             case 2:
               // 工具栏被点击则不改变指针样式
-              if (this.data.getToolClickStatus().value) break;
               this.screenShortController.value.style.cursor = "ns-resize";
               break;
             case 3:
               // 工具栏被点击则不改变指针样式
-              if (this.data.getToolClickStatus().value) break;
               this.screenShortController.value.style.cursor = "ew-resize";
               break;
             case 4:
               // 工具栏被点击则不改变指针样式
-              if (this.data.getToolClickStatus().value) break;
               this.screenShortController.value.style.cursor = "nwse-resize";
               break;
             case 5:
               // 工具栏被点击则不改变指针样式
-              if (this.data.getToolClickStatus().value) break;
               this.screenShortController.value.style.cursor = "nesw-resize";
               break;
             default:
@@ -625,31 +589,64 @@ export default class EventMonitoring {
    * @param mouseEvent
    */
   public toolClickEvent = (toolName: string, index: number) => {
-    this.data.setCanvasStatus(true); // 显示canvas图层
+    let undoStatus = this.data.getUndoStatus();
+    if(this.toolName == "undo" && !undoStatus) return; // 如果是撤销操作 且状态为false 
+    // 显示canvas图层
+    this.data.setCanvasStatus(true);
+
     // 更新当前点击的工具栏条目
     this.toolName = toolName;
     this.data.setToolName(toolName);
-    const state = this.data.getToolStatus();
+
+    // 截图操作过程中不允许画图
+    const state = this.data.getToolStatus(); // 此处为截图工具栏
     if (state.value && this.toolName != "close" && this.toolName != "confirm") {
-      // 截图操作过程中
       window.alert("请确认或取消截图!");
       return;
     }
+
+    // 修改鼠标样式
     if (this.screenShortController.value == null) return;
+    if (toolName == "save" || toolName == "download" || toolName == "undo") {
+      this.screenShortController.value.style.cursor = "default";
+    } else if (toolName == "clear") {
+      if (this.imgOrigController.value) {
+        this.imgOrigController.value.style.cursor = "move";
+      }
+    } else if (toolName == "text") {
+      this.screenShortController.value.style.cursor = "text";
+    } else {
+      this.screenShortController.value.style.cursor = "crosshair";
+    }
+
+    // 隐藏/显示画笔选择工具栏
     if (
       toolName == "shot" ||
       toolName == "save" ||
+      toolName == "download" ||
       toolName == "undo" ||
+      toolName == "clear" ||
       toolName == "close" ||
       toolName == "confirm"
     ) {
-      // 隐藏画笔工具栏
+      // 隐藏画笔选择工具栏
       this.data.setOptionStatus(false);
     } else {
       // 显示画笔选择工具栏
       this.data.setOptionStatus(true);
       // 设置画笔选择工具栏三角形角标位置
       this.data.setOptionIcoPosition(calculateOptionIcoPosition(index));
+    }
+    
+    // 初始化监听
+    if (
+      toolName != "save" &&
+      toolName != "download" &&
+      toolName != "undo" &&
+      toolName != "clear" &&
+      toolName != "close" &&
+      toolName != "confirm"
+    ) {
       // 添加监听
       this.screenShortController.value?.addEventListener(
         "mousedown",
@@ -664,55 +661,64 @@ export default class EventMonitoring {
         this.mouseUpEvent
       );
     }
+
     // 清空文本输入区域的内容并隐藏文本输入框
     if (this.textInputController?.value != null && this.data.getTextStatus()) {
       this.textInputController.value.innerHTML = "";
       this.data.setTextStatus(false);
     }
+
     // 初始化点击状态
     this.dragging = false;
     this.draggingTrim = false;
+    this.dragFlag = false;
+
+    // 截图画图后需要重新绘制底图 注意：画图工具直接获取底图；截图 保存 确认 需要等底图绘制完成后才能进行后续操作
     const captureState = this.data.getCaptureState();
     if (
       captureState.value &&
       toolName != "shot" &&
       toolName != "save" &&
+      toolName != "download" &&
       toolName != "confirm"
     ) {
       this.initCapture(); // 获取截屏底图
     }
-    if (toolName == "shot") {
-      // 打开截图功能
+    if (toolName == "shot") { // 打开截图功能
       if (captureState.value) {
         this.initCapture().then(() => {
-          this.captureClickEvent();
+          this.captureClickEvent(); // 开始截屏
         });
       } else {
-        this.captureClickEvent(); // 重新抓拍底图
+        this.captureClickEvent(); // 开始截屏
       }
-    } else if (toolName == "save") {
-      // 保存图片
+    } else if (toolName == "save") { // 保存图片
       if (captureState.value) {
         this.initCapture().then(() => {
-          this.getCanvasImgData(true);
+          this.getCanvasImgData('save');
         });
       } else {
-        this.getCanvasImgData(true);
+        this.getCanvasImgData('save');
       }
-    } else if (toolName == "undo") {
-      // 撤销
+    } else if (toolName == "download") { // 下载图片
+      if (captureState.value) {
+        this.initCapture().then(() => {
+          this.getCanvasImgData('download');
+        });
+      } else {
+        this.getCanvasImgData('download');
+      }
+    } else if (toolName == "undo") { // 撤销
       this.takeOutHistory();
-    } else if (toolName == "close") {
-      // 重置组件
+    } else if (toolName == "close" || toolName == "clear") { // 重置组件
       this.resetComponent();
-    } else if (toolName == "confirm" && this.screenShortCanvas && this.emit) {
-      // 确认截图
+    } else if (toolName == "confirm" && this.screenShortCanvas && this.emit) { // 确认截图
       if (captureState.value) {
         this.initCapture().then(() => {
-          this.getCanvasImgData(false);
+          this.getCanvasImgData('shot');
         });
       } else {
-        this.getCanvasImgData(false);
+        this.getCanvasImgData('shot');
       }
     }
     // 设置工具栏点击状态
@@ -818,13 +824,13 @@ export default class EventMonitoring {
    * 将指定区域的canvas转为图片
    * @private
    */
-  private getCanvasImgData = (isSave: boolean) => {
+  private getCanvasImgData = (isSave: string) => {
     // 获取裁剪区域位置信息
     const { startX, startY, width, height } = this.data.getCutOutBoxPosition();
     let base64 = "";
     // 保存图片,需要减去八个点的大小
     if (this.screenShortCanvas && this.screenShortController.value) {
-      if (!isSave) {
+      if (isSave == 'shot') {
         // 保存截图时
         // 清除绘制的蒙层(为了去掉八个点 且不改变框选区域大小)
         const contextCanvas = this.screenShortController.value?.getContext(
@@ -845,15 +851,20 @@ export default class EventMonitoring {
         this.screenShortController.value?.height
       );
       this.screenShortCanvas.restore(); // 绘制结束
-      if (isSave) {
+      if (isSave == 'save' || isSave == 'download') {
         // 下载图片
+        let isDownLoad = false
+        if(isSave == 'download') {
+          isDownLoad = true
+        }
         // 将canvas转为图片
         base64 = saveCanvasToImage(
           this.screenShortCanvas,
           0,
           0,
           this.screenShortController.value?.width,
-          this.screenShortController.value?.height
+          this.screenShortController.value?.height,
+          isDownLoad
         );
       } else {
         // 保存截图
@@ -882,10 +893,10 @@ export default class EventMonitoring {
           this.data.setImgPosition(data); // 重置位置
         }
         this.data.setCaptureState(true); // 重新抓拍底图
-        this.resetComponent(); // 重置组件
       }
-      if (this.emit) {
-        this.emit("get-img-data", base64);
+      this.resetComponent(); // 重置组件
+      if (this.emit && (isSave == 'save' || isSave == 'shot')) {
+        this.emit("get-img-data", {type: isSave, base64: base64});
       }
     }
     return base64;
@@ -896,7 +907,7 @@ export default class EventMonitoring {
    */
   public imgOptEvent = (
     value: string,
-    e: { buttons: any; clientX: number; clientY: number }
+    e: any
   ) => {
     const canvasStatus = this.data.getCanvasStatus();
     if (canvasStatus.value) return;
@@ -917,47 +928,47 @@ export default class EventMonitoring {
         imgPosition.value.deg = 0;
       }
     } else if (value == "mouseDown") {
-      // 当点击图片时，开始拖拽
-      if (e.buttons) {
-        imgPosition.value.isMove = true;
-        imgPosition.value.startX = e.clientX;
-        imgPosition.value.startY = e.clientY;
-      }
+      e.preventDefault()
+      imgPosition.value.isMove = true;
+      imgPosition.value.startX = e.clientX;
+      imgPosition.value.startY = e.clientY;
     } else if (value == "mouseMove") {
       // 当鼠标拖拽图片的时候，才计算移动距离
       // 移动图片相对于父元素的位置
-      if (imgPosition.value.isMove) {
+      if (imgPosition.value.isMove && this.imgOrigController.value) {
         // 鼠标移动的距离
         imgPosition.value.moveX = e.clientX;
         imgPosition.value.moveY = e.clientY;
         // 相对页面的距离
         const x = imgPosition.value.moveX - imgPosition.value.startX;
         const y = imgPosition.value.moveY - imgPosition.value.startY;
-        const img: any = document.querySelector("#imgContainer img");
-        if (!img) return;
-        imgPosition.value.endX = img?.offsetLeft + x;
-        imgPosition.value.endY = img?.offsetTop + y;
+        imgPosition.value.endX = this.imgOrigController.value.offsetLeft + x;
+        imgPosition.value.endY = this.imgOrigController.value.offsetTop + y;
         // 记录上次移动的距离
         imgPosition.value.startX = imgPosition.value.moveX;
         imgPosition.value.startY = imgPosition.value.moveY;
       }
     } else if (value == "mouseUp") {
       imgPosition.value.isMove = false;
+    } else if (value == "mouseLeave") {
+      imgPosition.value.isMove = false;
     }
-    if (value != "mouseUp") {
-      const data = {
-        multiples: imgPosition.value.multiples,
-        deg: imgPosition.value.deg,
-        endX: imgPosition.value.endX,
-        endY: imgPosition.value.endY,
-        isMove: imgPosition.value.isMove,
-        startX: imgPosition.value.startX,
-        startY: imgPosition.value.startY,
-        moveX: imgPosition.value.moveX,
-        moveY: imgPosition.value.moveY
-      };
-      this.data.setImgPosition(data);
-      this.data.setCaptureState(true); // 重新抓拍底图
+    // 设置样式
+    const data = {
+      multiples: imgPosition.value.multiples,
+      deg: imgPosition.value.deg,
+      endX: imgPosition.value.endX,
+      endY: imgPosition.value.endY,
+      isMove: imgPosition.value.isMove,
+      startX: imgPosition.value.startX,
+      startY: imgPosition.value.startY,
+      moveX: imgPosition.value.moveX,
+      moveY: imgPosition.value.moveY
+    };
+    this.data.setImgPosition(data);
+    // 重新抓拍底图
+    if (value != "mouseMove" && value != "mouseDown") {
+      this.data.setCaptureState(true);
     }
   };
 }
