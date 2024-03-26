@@ -147,7 +147,7 @@
                 <div class="imgList">
                   <div
                     v-for="(item, index) in imgData.imgList"
-                    :key="index"
+                    :key="item.key"
                     :class="`img-list-item ${item.currentImg ? 'active' : ''} `"
                   >
                     <input
@@ -267,7 +267,7 @@ import {
   setBrushSize,
   setTextStyle
 } from "@/module/common-methords/SetBrushSize";
-import { SetupContext } from "@vue/runtime-core";
+import { computed, SetupContext } from "@vue/runtime-core";
 import _ from "lodash";
 import toolbar from "@/module/config/Toolbar";
 import { reactive } from "vue";
@@ -312,37 +312,27 @@ export default {
     // 图片原始数据及切换
     const imgData = reactive({
       isSelectAll: false,
-      currentImgUrl: "",
-      imgList: [
-        {
-          url: "",
-          currentImg: true,
-          isChecked: false
-        }
-      ]
+      currentImgUrl: props.imageList[0] || "",
+      imgList: computed(() => {
+        return props.imageList.map((item: any, index: number) => {
+          if (index == 0) {
+            return {
+              key: new Date().getTime() + index,
+              url: item,
+              currentImg: true,
+              isChecked: false
+            };
+          } else {
+            return {
+              key: new Date().getTime() + index,
+              url: item,
+              currentImg: false,
+              isChecked: false
+            };
+          }
+        });
+      }) as any
     });
-    if (props.imageList.length > 0) {
-      imgData.imgList = [];
-      props.imageList.map((item: any, index: number) => {
-        if (index == 0) {
-          imgData.imgList.push({
-            url: item,
-            currentImg: true,
-            isChecked: false
-          });
-        } else {
-          imgData.imgList.push({
-            url: item,
-            currentImg: false,
-            isChecked: false
-          });
-        }
-      });
-      imgData.currentImgUrl = imgData.imgList[0].url;
-    } else {
-      imgData.imgList = [];
-      imgData.currentImgUrl = "";
-    }
     const selectAllImgFun = (val: { target: { checked: boolean } }) => {
       imgData.isSelectAll = val.target.checked;
       imgData.imgList.forEach((item: { isChecked: boolean }) => {
@@ -369,22 +359,19 @@ export default {
       val: { target: { checked: boolean } },
       numb: number
     ) => {
-      let allTag = true; // 图片是否全部被选中
-      imgData.imgList.forEach((item: { isChecked: boolean }, index: number) => {
-        if (numb == index) {
-          item.isChecked = val.target.checked;
-        }
-        if (!item.isChecked) {
-          allTag = false;
-        }
-      });
-      imgData.isSelectAll = allTag;
+      imgData.imgList[numb].isChecked = val.target.checked;
+
+      const indexItem = imgData.imgList.filter((item: any) => item.isChecked);
+      imgData.isSelectAll = indexItem.length === imgData.imgList.length;
     };
     const deleteImgFun = () => {
+      const index = imgData.imgList.findIndex((item: any) => item.isChecked);
+      if (index == -1) return;
+
       // 删除图片数据
       const imgArr: any = [];
       if (imgData.isSelectAll || imgData.imgList.length == 0) {
-        imgData.imgList = [];
+        imgData.imgList.value = [];
         imgData.currentImgUrl = "";
         // 初始化编辑数据
         data.setInitStatus(true);
@@ -394,15 +381,20 @@ export default {
         for (let i = imgData.imgList.length - 1; i >= 0; i--) {
           if (imgData.imgList[i].isChecked) {
             imgData.imgList.splice(i, 1);
-          } else {
-            imgArr.push(imgData.imgList[i].url);
           }
         }
+
+        imgData.imgList.map((item: any) => {
+          imgArr.push(item.url);
+        });
+
+        const indexItem = imgData.imgList.filter((item: any) => item.isChecked);
+        imgData.isSelectAll = indexItem.length === imgData.imgList.length;
+
         // 重新选中图片
         if (imgData.imgList.length > 0) {
-          const imgListLength = imgData.imgList.length;
-          imgData.imgList[imgListLength - 1].currentImg = true;
-          imgData.currentImgUrl = imgData.imgList[imgListLength - 1].url;
+          imgData.imgList[0].currentImg = true;
+          imgData.currentImgUrl = imgData.imgList[0].url;
           // 初始化编辑数据
           data.setInitStatus(true);
           data = new InitData();
