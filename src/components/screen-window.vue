@@ -313,8 +313,11 @@ export default {
     const imgData = reactive({
       isSelectAll: false,
       currentImgUrl: props.imageList[0] || "",
-      imgList: computed(() => {
-        return props.imageList.map((item: any, index: number) => {
+      imgList: [] as any
+    });
+    imgData.imgList = computed({
+      get() {
+        const newData = props.imageList.map((item: any, index: number) => {
           if (index == 0) {
             return {
               key: new Date().getTime() + index,
@@ -331,7 +334,11 @@ export default {
             };
           }
         });
-      }) as any
+        return newData;
+      },
+      set(value: any) {
+        imgData.imgList = value;
+      }
     });
     const selectAllImgFun = (val: { target: { checked: boolean } }) => {
       imgData.isSelectAll = val.target.checked;
@@ -365,36 +372,33 @@ export default {
       imgData.isSelectAll = indexItem.length === imgData.imgList.length;
     };
     const deleteImgFun = () => {
-      const index = imgData.imgList.findIndex((item: any) => item.isChecked);
+      const imgList = [...imgData.imgList];
+      const index = imgList.findIndex((item: any) => item.isChecked);
       if (index == -1) return;
 
       // 删除图片数据
       const imgArr: any = [];
-      if (imgData.isSelectAll || imgData.imgList.length == 0) {
-        imgData.imgList.value = [];
+      if (imgData.isSelectAll || imgList.length == 0) {
         imgData.currentImgUrl = "";
         // 初始化编辑数据
         data.setInitStatus(true);
         data = new InitData();
         resetComponent();
       } else {
-        for (let i = imgData.imgList.length - 1; i >= 0; i--) {
-          if (imgData.imgList[i].isChecked) {
-            imgData.imgList.splice(i, 1);
+        for (let i = imgList.length - 1; i >= 0; i--) {
+          if (imgList[i].isChecked) {
+            imgList.splice(i, 1);
           }
         }
 
-        imgData.imgList.map((item: any) => {
+        imgList.map((item: any) => {
           imgArr.push(item.url);
         });
 
-        const indexItem = imgData.imgList.filter((item: any) => item.isChecked);
-        imgData.isSelectAll = indexItem.length === imgData.imgList.length;
-
         // 重新选中图片
-        if (imgData.imgList.length > 0) {
-          imgData.imgList[0].currentImg = true;
-          imgData.currentImgUrl = imgData.imgList[0].url;
+        if (imgList.length > 0) {
+          imgList[0].currentImg = true;
+          imgData.currentImgUrl = imgList[0].url;
           // 初始化编辑数据
           data.setInitStatus(true);
           data = new InitData();
